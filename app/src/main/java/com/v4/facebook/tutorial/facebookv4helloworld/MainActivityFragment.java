@@ -1,6 +1,8 @@
 package com.v4.facebook.tutorial.facebookv4helloworld;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -9,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -34,9 +37,18 @@ public class MainActivityFragment extends Fragment {
     private ProfileTracker profileTracker;
 
     private CallbackManager mCallbackManager;
+
     private FacebookCallback<LoginResult> mCallback = new FacebookCallback<LoginResult>() {
         @Override
         public void onSuccess(LoginResult loginResult) {
+            if(loginResult.getRecentlyGrantedPermissions().contains(Constants.FB_PUBLISH_PERMISSION)) {
+                //save to sharedPreferences
+                PreferencesUtils.writePreferenceValue(getActivity().getApplicationContext(), Constants.PREFS_POST, true);
+                Toast.makeText(getActivity().getApplicationContext(), "We are able to post on your wall", Toast.LENGTH_LONG).show();
+            } else {
+                PreferencesUtils.writePreferenceValue(getActivity().getApplicationContext(), Constants.PREFS_POST, false);
+            }
+
             AccessToken accessToken = loginResult.getAccessToken();
             getFacebookName();
         }
@@ -51,6 +63,10 @@ public class MainActivityFragment extends Fragment {
 
         }
     };
+
+    public static MainActivityFragment newInstance(){
+        return new MainActivityFragment();
+    }
 
     public MainActivityFragment() {
 
